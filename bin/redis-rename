@@ -1,0 +1,77 @@
+#!/usr/bin/env node
+
+var spawn       = require('child_process').spawn
+,   isVerbose   = process.argv[2] in {'-v':1, '--verbose':1}
+,   oldPattern  = process.argv[isVerbose ? 3 : 2]
+,   newPattern  = process.argv[isVerbose ? 4 : 3]
+
+if(!oldPattern || !newPattern)
+  return usage();
+
+var rOldPattern = toRegex(oldPattern)
+,   rNewPattern = toRegex(newPattern);
+
+
+function usage(){
+  console.log('\
+  Usage: redis-rename [options] oldPattern newPattern   \n\
+                                                        \n\
+  Options:                                              \n\
+    -v, --verbose           Verbose mode                \n\
+    -h, --help              This message.               \n\
+  ');
+}
+
+
+function findKeys(fn){
+  spawn('redis-cli', ['keys', oldPattern])
+    .stdout
+    .on('data', function (keys) {fn(keys.toString().trim().split('\n'))});
+}
+
+function renameKeys(keys){
+  var i = keys.length - 1;
+
+  function fnIter(){
+    var newKey = pReplace(keys[i], oldPattern, newPattern);
+    var args   = ['rename', keys[i], newKey];
+
+    spawn('redis-cli', args)
+      .stdout
+      .on('data', function(res){
+        res = res.toString().trim();
+
+        if(res == 'OK'){
+          isVerbose && console.log('✔ ', args.slice(1).join(' → '));
+          return fnDone();
+        }
+
+        console.error('>', args.join(' '));
+        console.error(res.trim());
+      });
+  }
+
+  function fnDone(){
+    if(--i == -1) return;
+
+    fnIter();
+  }
+
+  fnIter();
+}
+
+function toRegex(pattern){
+  return new RegExp(pattern.replace(/\*/gi,'(.*)'), 'g');
+}
+
+// Quick & dirty
+function pReplace(str, oldPattern, newPattern){
+  var oldPart = str.split(rOldPattern).slice(1,-1)
+  ,   i = 0;
+
+  return newPattern.replace(/\*/gi, function(){
+    return oldPart[i++];
+  });
+}
+
+findKeys(renameKeys);
