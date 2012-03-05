@@ -40,13 +40,13 @@ Options:
 
 ```shell
 $ redis-delall -v ns:*:*:k
-✔  ns:6:43:k delete
-✔  ns:1:121:k delete
-✔  ns:1:119:k delete
-✔  ns:1:121:k delete
-✔  ns:6:108:k delete
-✔  ns:1:121:k delete
-✔  ns:1:120:k delete
-✔  ns:6:90:k delete
-✔  ns:6:93:k delete
+✔  ns:6:43:k deleted
+✔  ns:1:121:k deleted
+✔  ns:1:119:k deleted
+✔  ns:1:121:k deleted
+✔  ns:6:108:k deleted
+✔  ns:1:121:k deleted
+✔  ns:1:120:k deleted
+✔  ns:6:90:k deleted
+✔  ns:6:93:k deleted
 ```
