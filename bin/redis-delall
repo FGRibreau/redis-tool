@@ -1,0 +1,51 @@
+#!/usr/bin/env node
+
+var spawn = require('child_process').spawn
+, r       = require(__dirname+'/../lib/')
+, arg     = require('optimist').usage('Usage: $0 [options] pattern')
+      .describe('p', 'preview what is going to be deleted').alias('p', 'preview').boolean('p')
+      .describe('v', 'verbose mode').alias('v', 'verbose').boolean('v')
+      .describe('h', 'this message.').alias('h','help').boolean('h')
+      .default({ v : false, p : false })
+, argv    = arg.argv
+, pattern = argv._[0];
+
+if(argv.h || argv._.length != 1){
+  return arg.showHelp(console.error);
+}
+
+
+function delKeys(keys){
+  var i = keys.length - 1;
+
+  function fnIter(){
+    var args   = ['del', keys[i]];
+
+    r.redisCli(args, function(res){
+      if(res == 1){
+        argv.verbose && console.log('✔ ', keys[i], 'deleted');
+        return fnDone();
+      }
+
+      console.error('>', args.join(' '));
+      console.error(res.trim());
+    });
+  }
+
+  function fnDone(){
+    if(--i == -1) return;
+    fnIter();
+  }
+
+  fnIter();
+}
+
+function printKeys(keys){
+  console.log(keys.join('\n'));
+  console.log("%s key(s) found", keys.length);
+}
+
+
+function fnIf(cond, fnCondValid, fnCondFalse){return cond ? fnCondValid : fnCondFalse;}
+
+r.findKeys(pattern, fnIf(argv.preview, printKeys, delKeys));
