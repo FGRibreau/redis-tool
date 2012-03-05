@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-var spawn       = require('child_process').spawn
-,   isVerbose   = process.argv[2] in {'-v':1, '--verbose':1}
-,   oldPattern  = process.argv[isVerbose ? 3 : 2]
-,   newPattern  = process.argv[isVerbose ? 4 : 3]
+var spawn      = require('child_process').spawn
+,   r          = require(__dirname+'/../lib/')
+,   isVerbose  = process.argv[2] in {'-v':1, '--verbose':1}
+,   oldPattern = process.argv[isVerbose ? 3 : 2]
+,   newPattern = process.argv[isVerbose ? 4 : 3];
 
 if(!oldPattern || !newPattern)
   return usage();
@@ -14,19 +15,12 @@ var rOldPattern = toRegex(oldPattern)
 
 function usage(){
   console.log('\
-  Usage: redis-rename [options] oldPattern newPattern   \n\
-                                                        \n\
-  Options:                                              \n\
-    -v, --verbose           Verbose mode                \n\
-    -h, --help              This message.               \n\
-  ');
-}
-
-
-function findKeys(fn){
-  spawn('redis-cli', ['keys', oldPattern])
-    .stdout
-    .on('data', function (keys) {fn(keys.toString().trim().split('\n'))});
+Usage: redis-rename [options] oldPattern newPattern   \n\
+                                                      \n\
+Options:                                              \n\
+  -v, --verbose           Verbose mode                \n\
+  -h, --help              This message.               \n\
+');
 }
 
 function renameKeys(keys){
@@ -36,24 +30,19 @@ function renameKeys(keys){
     var newKey = pReplace(keys[i], oldPattern, newPattern);
     var args   = ['rename', keys[i], newKey];
 
-    spawn('redis-cli', args)
-      .stdout
-      .on('data', function(res){
-        res = res.toString().trim();
+    r.redisCli(args, function(res){
+      if(res == 'OK'){
+        isVerbose && console.log('✔ ', args.slice(1).join(' → '));
+        return fnDone();
+      }
 
-        if(res == 'OK'){
-          isVerbose && console.log('✔ ', args.slice(1).join(' → '));
-          return fnDone();
-        }
-
-        console.error('>', args.join(' '));
-        console.error(res.trim());
-      });
+      console.error('>', args.join(' '));
+      console.error(res.trim());
+    });
   }
 
   function fnDone(){
     if(--i == -1) return;
-
     fnIter();
   }
 
@@ -74,4 +63,4 @@ function pReplace(str, oldPattern, newPattern){
   });
 }
 
-findKeys(renameKeys);
+r.findKeys(oldPattern, renameKeys);
