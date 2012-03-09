@@ -15,7 +15,8 @@
 
     "bin":{
         "redis-rename":     "./bin/redis-rename",
-        "redis-delall":     "./bin/redis-delall"
+        "redis-delall":     "./bin/redis-delall",
+        "redis-zlist-size": "./bin/redis-zlist-size"
     },
     
     "author" : "Francois-Guillaume Ribreau <npm@fgribreau.com> (http://fgribreau.com)",
