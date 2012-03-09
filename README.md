@@ -44,7 +44,9 @@ bringr:1:121:ua:d     Members   2248963     Size    12071
 
 Generated pie chart by members count
 
-![Example of generated pie chart by members count](/fgribreau/redis-tool/raw/master/docs/redis-zlist-size-c1.png)
+<center>
+  ![Example of generated pie chart by members count](/fgribreau/redis-tool/raw/master/docs/redis-zlist-size-c1.png)
+</center>
 
 <a name="rename" />
 ### Redis-rename
