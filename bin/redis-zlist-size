@@ -1,0 +1,150 @@
+#!/usr/bin/env node
+
+var spawn = require('child_process').spawn
+, qs      = require('querystring')
+, r       = require(__dirname+'/../lib/')
+, arg     = require('optimist').usage('\
+Retrieve a list of zset keys via `pattern` and order them by size \n\n\
+Usage: $0 [options] pattern')
+      .describe('json', 'print results in JSON format').boolean('p')
+      .describe('graph', 'generate a Google Graph link').boolean('graph')
+      .describe('v', 'verbose mode').alias('v', 'verbose').boolean('v')
+      .describe('h', 'this message.').alias('h','help').boolean('h')
+      .default({ v : false, graph:false, json:false })
+, argv    = arg.argv
+, pattern = argv._[0];
+
+if(argv.h || argv._.length != 1){
+  return arg.showHelp(console.error);
+}
+
+
+// First check type
+function checkKeysType(keys, fnNext){
+  var i = keys.length - 1;
+
+  function fnIter(key){
+    r.redisCli(['TYPE', key], function(res){
+      if(res != 'zset'){
+        console.error('Warning:', 'omitting "', key, '". It\'s not a zset (',res,')');
+      }
+
+      fnDone();
+    });
+  }
+
+  function fnDone(){
+    if(--i == -1){
+      argv.verbose && console.log(keys.length, 'key(s) found');
+      return fnNext(keys);
+    }
+
+    process.nextTick(fnIter.curry(keys[i]));
+  }
+
+  fnIter(keys[i]);
+}
+
+// Then calc key size
+function calcKeysSize(keys, fnNext){
+  var i = keys.length - 1
+  ,   keysWithSize = [];
+
+  function fnIter(key){
+
+    r.redisCli(['ZREVRANGE', key, 0, -1], function(res){
+      var members = (res.split("\n") || [])
+      ,   max = -1
+      ,   largestKey = '';
+
+      keysWithSize.push(
+        [
+          key
+        , members.reduce(function(m, v){
+            m += v.length || 0;
+
+            if(argv.json && v.length > max){
+              max = v.length;
+              largestKey = v;
+            }
+
+            return m;
+          }, 0)
+        , members.length
+        , largestKey
+        ]);
+
+      fnDone();
+    });
+  }
+
+
+  function fnDone(){
+    if(--i == -1) return fnNext(keysWithSize);
+    process.nextTick(fnIter.curry(keys[i]));
+  }
+
+  fnIter(keys[i]);
+}
+
+
+function sortKeys(keysWithSize){
+
+  keysWithSize.sort(function sortAsc(a, b){
+    return b[1] - a[1];
+  }).forEach(function formatStr(line){
+
+    if(argv.json) return console.log(JSON.stringify(line));
+
+    console.log(formatTab(line[0], "Members", line[1], "Size", line[2]));
+  });
+
+  if(argv.graph){
+    console.log('\nPie chart by members count:');
+    console.log(getGraphLink(keysWithSize, 1));
+
+    console.log('\nPie chart by key size:');
+    console.log(getGraphLink(keysWithSize, 2));
+  }
+}
+
+function formatTab(){
+  var args = Array.prototype.slice.call(arguments);
+  return args.map(function(column){
+    return column + "\t\t";
+  }).join('');
+}
+
+function getGraphLink(keysWithSize, index){
+  var   chd = []
+  ,     chdl = []
+  ,     TAKE = 10
+  ,     colors = ['556270', '4ECDC4', 'C7F464', 'FF6B6B', 'C44D58',
+                  'D1F2A5', 'EFFAB4','FFC48C','FF9F80','F56991',
+                  '00A0B0', '6A4A3C', 'CC333F', 'EB6841', 'EDC951'
+                ];
+
+  keysWithSize.slice(0, TAKE).forEach(function(key){
+    chdl.push(qs.escape(key[0].split(':').slice(0,-1).join(':'))); // legend
+    chd.push(qs.escape(key[index])); // value
+  });
+
+  return "http://chart.apis.google.com/chart"+
+   "?chs=527x493"+ // graph size
+   "&chxs=0,000000,10.833"+ // data labels
+   "&cht=p3"+
+   "&chma=80,80|1"+ // margin
+   "&chco="+chd.map(function(o, i){return colors[i%colors.length];}).join('|')+
+   "&chds=0,"+Math.max.apply(Math, chd)+ // Range
+   "&chd=t:"+chd.join(',')+""+ // Values
+   "&chdl="+chdl.join('|')+""+ // Legend
+   "&chl="+chd.join('|')+ // Label
+   "&chdlp=b"+
+   "&chp=0.067"+
+   "&chtt="+pattern+"+(Gen. by redis-zlist-size)"; // Title
+}
+
+r.findKeys(pattern,
+  checkKeysType.partial(undefined,
+      calcKeysSize.partial(undefined,
+          sortKeys)));
