@@ -2,7 +2,7 @@
     "name" : "redis-tool",
     "description" : "Redis-tool - Tools for redis",
     "keywords": ["redis", "tool"],
-    "version": "0.0.2",
+    "version": "0.0.3",
     "homepage": "https://github.com/FGRibreau/redis-tool",
     "repository": {
         "type": "git",
