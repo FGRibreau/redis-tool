@@ -17,9 +17,13 @@
 ```
 Usage: node ./bin/redis-ztrim [options] pattern start stop
 
-Trim a group of zlists matching `pattern` so that they'll contain only the specified range of elements specified. Both start and stop are zero-based indexes, where 0 is the first element of the list with the highest score (the head), 1 the next element and so on.
+Trim a group of zlists matching `pattern` so that they'll contain only the specified
+range of elements specified. Both start and stop are zero-based indexes,
+where 0 is the first element of the list with the highest score (the head), 1 the next
+element and so on.
 
-For example: redis-ztrim foobar* 0 2 will modify the zsets matching the pattern foobar* so that only the first three elements of each zsets will remain.
+For example: redis-ztrim foobar* 0 2 will modify the zsets matching the pattern foobar*
+so that only the first three elements of each zsets will remain.
 
 Options:
   -p, --preview  preview what is going to be deleted  [boolean]  [default: false]
