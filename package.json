@@ -2,7 +2,7 @@
     "name" : "redis-tool",
     "description" : "Redis-tool - Tools for redis",
     "keywords": ["redis", "tool"],
-    "version": "0.0.3",
+    "version": "0.0.4",
     "homepage": "https://github.com/FGRibreau/redis-tool",
     "repository": {
         "type": "git",
@@ -16,7 +16,8 @@
     "bin":{
         "redis-rename":     "./bin/redis-rename",
         "redis-delall":     "./bin/redis-delall",
-        "redis-zlist-size": "./bin/redis-zlist-size"
+        "redis-zlist-size": "./bin/redis-zlist-size",
+        "redis-ztrim":      "./bin/redis-ztrim"
     },
     
     "author" : "Francois-Guillaume Ribreau <npm@fgribreau.com> (http://fgribreau.com)",

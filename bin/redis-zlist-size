@@ -18,7 +18,6 @@ if(argv.h || argv._.length != 1){
   return arg.showHelp(console.error);
 }
 
-
 // First check type
 function checkKeysType(keys, fnNext){
   var i = keys.length - 1;
@@ -60,6 +59,7 @@ function calcKeysSize(keys, fnNext){
       keysWithSize.push(
         [
           key
+        , members.length
         , members.reduce(function(m, v){
             m += v.length || 0;
 
@@ -70,7 +70,6 @@ function calcKeysSize(keys, fnNext){
 
             return m;
           }, 0)
-        , members.length
         , largestKey
         ]);
 
