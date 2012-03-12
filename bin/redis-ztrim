@@ -17,8 +17,8 @@ For example: redis-ztrim foobar* 0 2 will modify the zsets matching the pattern 
 , start   = argv._[1]
 , stop    = argv._[2];
 
-if(argv.h || argv._.length != 3 || start != 0){
-  if(start != 0){console.error('Unsupported: start should be 0.')}
+if(argv.h || argv._.length < 1 || argv._.length > 1 && (stop == undefined || start != undefined && start != 0)){
+  if(argv._.length > 1 && start != 0){console.error('Unsupported: start should be 0.')}
   return arg.showHelp(console.error);
 }
 
@@ -27,12 +27,11 @@ function trimKeys(keys){
 
   function fnIter(){
 
-    // ZREMRANGEBYRANK a 0 -2
     var args   = ['zremrangebyrank', keys[i], 0, -stop-1];
 
     r.redisCli(args, function(res){
       if(!isNaN(parseInt(res, 10))){
-        argv.verbose && console.log('✔ ', keys[i], 'trimmed');
+        argv.verbose && console.log('✔ ', keys[i], ,"\t", 'trimmed');
         return fnDone();
       }
 
