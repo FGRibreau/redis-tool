@@ -1,0 +1,60 @@
+#!/usr/bin/env node
+
+var spawn = require('child_process').spawn
+, r       = require(__dirname+'/../lib/')
+, arg     = require('optimist').usage('\
+Usage: $0 [options] pattern start stop \n\n\
+\
+Trim a group of zlists matching `pattern` so that they\'ll contain only the specified range of elements specified. \
+Both start and stop are zero-based indexes, where 0 is the first element of the list with the highest score (the head), 1 the next element and so on. \n\n\
+For example: redis-ztrim foobar* 0 2 will modify the zsets matching the pattern foobar* so that only the first three elements of each zsets will remain.')
+      .describe('p', 'preview what is going to be deleted').alias('p', 'preview').boolean('p')
+      .describe('v', 'verbose mode').alias('v', 'verbose').boolean('v')
+      .describe('h', 'this message.').alias('h','help').boolean('h')
+      .default({ v : false, p : false })
+, argv    = arg.argv
+, pattern = argv._[0]
+, start   = argv._[1]
+, stop    = argv._[2];
+
+if(argv.h || argv._.length != 3 || start != 0){
+  if(start != 0){console.error('Unsupported: start should be 0.')}
+  return arg.showHelp(console.error);
+}
+
+function trimKeys(keys){
+  var i = keys.length - 1;
+
+  function fnIter(){
+
+    // ZREMRANGEBYRANK a 0 -2
+    var args   = ['zremrangebyrank', keys[i], 0, -stop-1];
+
+    r.redisCli(args, function(res){
+      if(!isNaN(parseInt(res, 10))){
+        argv.verbose && console.log('✔ ', keys[i], 'trimmed');
+        return fnDone();
+      }
+
+      console.error('>', args.join(' '));
+      console.error(res.trim());
+    });
+  }
+
+  function fnDone(){
+    if(--i == -1) return;
+    fnIter();
+  }
+
+  fnIter();
+}
+
+function printKeys(keys){
+  console.log(keys.join('\n'));
+  console.log("%s key(s) found", keys.length);
+}
+
+
+function fnIf(cond, fnCondValid, fnCondFalse){return cond ? fnCondValid : fnCondFalse;}
+
+r.findKeys(pattern, fnIf(argv.preview, printKeys, trimKeys));
