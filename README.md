@@ -31,7 +31,8 @@ Options:
   -h, --help     this message.                        [boolean]
 ```
 
-Trim all zsets matching the pattern `bringr:*:*:ua:*" so that only their members ranked from 0 to 99 will remain.
+Trim all zsets matching the pattern `bringr:*:*:ua:*"` so that only their members ranked from 0 to 99 will remain.
+
 ```shell
 $ redis-ztrim
 ✔  bringr:1:121:ua:m   trimmed
