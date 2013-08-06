@@ -82,7 +82,7 @@ bringr:6:93:ua:d      Members   6720535     Size    34702
 Generated pie chart by members count
 
 <center>
-  ![Example of generated pie chart by members count](/fgribreau/redis-tool/raw/master/docs/redis-zlist-size-c1.png)
+  ![Example of generated pie chart by members count](https://raw.github.com/FGRibreau/redis-tool/master/docs/redis-zlist-size-c1.png)
 </center>
 
 <a name="rename" />
