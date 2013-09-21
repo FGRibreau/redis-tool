@@ -1,3 +1,6 @@
+Redis tool [![Gittip](http://badgr.co/gittip/fgribreau.png)](https://www.gittip.com/fgribreau/)
+-----------
+
 `Redis-tool` is a collection of little node scripts
 
 ## Installation
