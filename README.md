@@ -136,3 +136,6 @@ $ redis-delall -v ns:*:*:k
 ✔  ns:6:90:k deleted
 ✔  ns:6:93:k deleted
 ```
+
+## Donate
+[Donate Bitcoins](https://coinbase.com/checkouts/fc3041b9d8116e0b98e7d243c4727a30)
