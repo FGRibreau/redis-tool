@@ -1,4 +1,4 @@
-Redis tool
+Redis tool [![Get help on Codementor](https://cdn.codementor.io/badges/get_help_github.svg)](https://www.codementor.io/fgribreau?utm_source=github&utm_medium=button&utm_term=fgribreau&utm_campaign=github) 
 -----------
 
 `Redis-tool` is a collection of little node scripts that are helpful if you don't use a GUI like [Redsmin](https://redsmin.com/).
